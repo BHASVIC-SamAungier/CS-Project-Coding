@@ -4,7 +4,7 @@ import sys
 import json
 
 
-class MainWindow(QWidget): #main window class
+class MainWindow(QWidget):  # main window class
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Investment Portfolio Tracker")
@@ -13,6 +13,7 @@ class MainWindow(QWidget): #main window class
         self.navbar = QHBoxLayout()
         self.home_button = QPushButton("Home")
         self.add_button = QPushButton("Add Investment")
+        self._button = QPushButton("")
         self.navbar.addWidget(self.home_button)
         self.navbar.addWidget(self.add_button)
 
@@ -52,11 +53,11 @@ class MainWindow(QWidget): #main window class
         self.ticker_input = QLineEdit()
         layout.addWidget(self.ticker_input)
 
-        layout.addWidget(QLabel("Buy Price: "))
+        layout.addWidget(QLabel("Buy Price (DO NOT INCLUDE £): "))
         self.buy_input = QLineEdit()
         layout.addWidget(self.buy_input)
 
-        layout.addWidget(QLabel("Current Price: "))
+        layout.addWidget(QLabel("Current Price (DO NOT INCLUDE £): "))
         self.current_input = QLineEdit()
         layout.addWidget(self.current_input)
 
@@ -78,7 +79,7 @@ class MainWindow(QWidget): #main window class
         page.setLayout(layout)
         return page
 
-    # page swtichin
+    #page switching
     def show_home_page(self):
         self.home_page.show()
         self.add_page.hide()
@@ -98,27 +99,27 @@ class MainWindow(QWidget): #main window class
             if not ticker or buy_price <= 0 or quantity <= 0:
                 return ValueError
 
-            stock = { "ticker": ticker, "buy_price": buy_price, "current_price": current_price, "quantity": quantity }
+            stock = {"ticker": ticker, "buy_price": buy_price, "current_price": current_price, "quantity": quantity}
             self.portfolio_list.append(stock)
             print("Stock added successfully!")
         except ValueError:
             print("Invalid input try again")
 
     def save_portfolio(self):
-        with open("portfolio.json", "w") as f: #tut for this line
-            json.dump(self.portfolio_list, f)  #tut for this line
+        with open("portfolio.json", "w") as f:  # tut for this - cite
+            json.dump(self.portfolio_list, f)  # tut for this - cite
         print("Portfolio saved successfully!")
 
     def load_portfolio(self):
         try:
-            with open("portfolio.json", "r") as f: #tut for this line
-                self.portfolio_list = json.load(f) #tut for this line
+            with open("portfolio.json", "r") as f:  # tut for this - cite
+                self.portfolio_list = json.load(f)  # tut for this - cite
             print("Portfolio loaded successfully!")
         except FileNotFoundError:
             print("No saved portfolio found")
 
 
-if __name__ == "__main__": #tut for this line
+if __name__ == "__main__":  # tut for this - cite
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
