@@ -3,6 +3,9 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QP
 import sys
 import json
 
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+
+
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
@@ -189,12 +192,40 @@ class MainWindow(QWidget):
         self.results_label.setText(output)
         self.results_label.setStyleSheet(f"color: {colour};")
 
+        def create_portfolio_overview_page(self, page = None):
+
+            page = QWidget()
+            self.overview_layout = QVBoxLayout()
+            page.setLayout(self.overview_layout)
+
+            layout = QVBoxLayout()
+
+            layout.addWidget(QLabel("Portfolio Overview"))
+            results_label = QLabel("Click below to calculate your Profit/Loss.")
+            layout.addWidget(results_label)
+
+            self.graph_button = QPushButton("Generate Graph")
+
+            layout.addWidget(self.graph_button)
+
+            return page
+        def display_portfolio_graph_on_overview(self):
+
+            stock_names = [s['ticker'] for s in self.portfolio_list]
+            profit_loss_values = [s['profit_loss'] for s in self.portfolio_list]
+
+            import matplotlib.pyplot as plt
+            plt.bar(stock_names, profit_loss_values)
+            plt.show()
+
+            for i in reversed(self.overview_layout.count()):
+            widget = self.overview_layout.itemAt(i).widget()
+            if isinstance(widget, FigureCanvasQTAgg):
+                widget.setParent(None)
+
 #main exec
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
     sys.exit(app.exec_())
-
-
-
