@@ -176,8 +176,8 @@ class MainWindow(QWidget):
             t = float(self.years_input.text())
             n = float(self.freq_input.text())
 
-            T = P * (1 + r / n) * (n * t) #standard comppound interest formula
-            interest = A - P
+            T = P * (1 + r / n) ** (n * t) #standard comppound interest formula
+            interest = T - P
 
             self.result_label.setText(f"Total Amount: £{T:.2f}\nInterest Earned: £{interest:.2f}")
         except ValueError:
