@@ -207,18 +207,15 @@ class MainWindow(QWidget):
         self.results_label.setStyleSheet(f"color: {colour}")
 
     def Portfolio_Overview_Graph(self):
-
         json_data = {
             "Stocks": [self.portfolio_list],
             "Value": [self.portfolio_list]
         }
-
         plt.bar(json_data["Stocks"], json_data["Value"])
         plt.xlabel('Stocks')
         plt.ylabel('Value')
         plt.title('Portfolio Overview Graph')
         plt.show()
-
 
     def fetch_current_price(self):
         key = self.api_key_input.text().strip()
@@ -243,37 +240,37 @@ class MainWindow(QWidget):
         except Exception as e:
             print("API Error:", e)
 
-        def export_portfolio(self):
-            if not self.portfolio_list:
-                print("Add stocks first before exporting")
-                return
+    def export_portfolio(self):
+        if not self.portfolio_list:
+            print("Add stocks first before exporting")
+            return
 
-            self.calculate_profit_loss()
-            total_value = self.calculate_total_portfolio_value()
-            total_profit_loss = sum(stock["profit_loss"] for stock in self.portfolio_list)
+        self.calculate_profit_loss()
+        total_value = self.calculate_total_portfolio_value()
+        total_profit_loss = sum(stock["profit_loss"] for stock in self.portfolio_list)
 
-            text = "Investment Portfolio Report\n\n"
+        text = "Investment Portfolio Report\n\n"
 
-            for stock in self.portfolio_list:
-                text += (
-                    f"{stock['ticker']} - Buy: £{stock['buy_price']:.2f}, "
-                    f"Current: £{stock['current_price']:.2f}, "
-                    f"Qty: {stock['quantity']}, "
-                    f"P/L: £{stock['profit_loss']:.2f}\n"
-                )
+        for stock in self.portfolio_list:
+            text += (
+                f"{stock['ticker']} - Buy: £{stock['buy_price']:.2f}, "
+                f"Current: £{stock['current_price']:.2f}, "
+                f"Qty: {stock['quantity']}, "
+                f"P/L: £{stock['profit_loss']:.2f}\n"
+            )
 
-            text += f"\nTotal Portfolio Value: £{total_value:.2f}\n"
-            text += f"Overall Profit/Loss: £{total_profit_loss:.2f}\n"
+        text += f"\nTotal Portfolio Value: £{total_value:.2f}\n"
+        text += f"Overall Profit/Loss: £{total_profit_loss:.2f}\n"
 
-            printer = QPrinter()
-            printer.setOutputFormat(QPrinter.PdfFormat)
-            printer.setOutputFileName("portfolio_report.pdf")
+        printer = QPrinter()
+        printer.setOutputFormat(QPrinter.PdfFormat)
+        printer.setOutputFileName("portfolio_report.pdf")
 
-            doc = QTextDocument()
-            doc.setPlainText(text)
-            doc.print_(printer)
+        doc = QTextDocument()
+        doc.setPlainText(text)
+        doc.print_(printer)
 
-            print("Portfolio exported as portfolio_report.pdf")
+        print("Portfolio exported as portfolio_report.pdf")
 
 
 #main exec
