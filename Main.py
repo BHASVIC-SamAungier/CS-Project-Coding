@@ -1,9 +1,11 @@
-import plt
 from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QLineEdit, QStackedWidget)
+from PyQt5.QtPrintSupport import QPrinter
+from PyQt5.QtGui import QTextDocument
 
 import sys
 import json
-import matplotlib
+import matplotlib.pyplot as plt
+import requests
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -54,9 +56,17 @@ class MainWindow(QWidget):
         page = QWidget()
         layout = QVBoxLayout()
 
+        layout.addWidget(QLabel("AlphaVantage API Key: "))
+        self.api_key_input = QLineEdit()
+        layout.addWidget(self.api_key_input)
+
         layout.addWidget(QLabel("Stock Ticker: "))
         self.ticker_input = QLineEdit()
         layout.addWidget(self.ticker_input)
+
+        self.fetch_price_button = QPushButton("Fetch Latest Price")
+        layout.addWidget(self.fetch_price_button)
+        self.fetch_price_button.clicked.connect(self.fetch_current_price)
 
         layout.addWidget(QLabel("Buy Price: "))
         self.buy_input = QLineEdit()
@@ -71,15 +81,20 @@ class MainWindow(QWidget):
         layout.addWidget(self.quantity_input)
 
         self.add_stock_button = QPushButton("Add Stock")
-        self.save_button = QPushButton("Save Portfolio")
-        self.load_button = QPushButton("Load Portfolio")
         layout.addWidget(self.add_stock_button)
-        layout.addWidget(self.save_button)
-        layout.addWidget(self.load_button)
-
         self.add_stock_button.clicked.connect(self.add_stock)
+
+        self.save_button = QPushButton("Save Portfolio")
+        layout.addWidget(self.save_button)
         self.save_button.clicked.connect(self.save_portfolio)
+
+        self.load_button = QPushButton("Load Portfolio")
+        layout.addWidget(self.load_button)
         self.load_button.clicked.connect(self.load_portfolio)
+
+        self.export_button = QPushButton("Export Portfolio to pdf")
+        layout.addWidget(self.export_button)
+        self.export_button.clicked.connect(self.export_portfolio)
 
         page.setLayout(layout)
         return page
@@ -110,7 +125,7 @@ class MainWindow(QWidget):
     def show_portfolio_overview_page(self):
         self.stacked.setCurrentWidget(self.overview_page)
 
-    #add stock function
+    # add stock function
     def add_stock(self):
         try:
             ticker = self.ticker_input.text().strip()
@@ -204,12 +219,61 @@ class MainWindow(QWidget):
         plt.title('Portfolio Overview Graph')
         plt.show()
 
-        
 
+    def fetch_current_price(self):
+        key = self.api_key_input.text().strip()
+        symbol = self.ticker_input.text().strip().upper()
 
+        if not key or not symbol:
+            print("Missing API key or ticker")
+            return
 
+        try:
+            url = f"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={symbol}&apikey={key}"
+            r = requests.get(url)
+            data = r.json()
+            price = data.get("Global Quote", {}).get("05. price")
 
+            if price:
+                self.current_input.setText(str(round(float(price), 2)))
+                print(f"{symbol} price updated!")
+            else:
+                print("Invalid API response")
 
+        except Exception as e:
+            print("API Error:", e)
+
+        def export_portfolio(self):
+            if not self.portfolio_list:
+                print("Add stocks first before exporting")
+                return
+
+            self.calculate_profit_loss()
+            total_value = self.calculate_total_portfolio_value()
+            total_profit_loss = sum(stock["profit_loss"] for stock in self.portfolio_list)
+
+            text = "Investment Portfolio Report\n\n"
+
+            for stock in self.portfolio_list:
+                text += (
+                    f"{stock['ticker']} - Buy: £{stock['buy_price']:.2f}, "
+                    f"Current: £{stock['current_price']:.2f}, "
+                    f"Qty: {stock['quantity']}, "
+                    f"P/L: £{stock['profit_loss']:.2f}\n"
+                )
+
+            text += f"\nTotal Portfolio Value: £{total_value:.2f}\n"
+            text += f"Overall Profit/Loss: £{total_profit_loss:.2f}\n"
+
+            printer = QPrinter()
+            printer.setOutputFormat(QPrinter.PdfFormat)
+            printer.setOutputFileName("portfolio_report.pdf")
+
+            doc = QTextDocument()
+            doc.setPlainText(text)
+            doc.print_(printer)
+
+            print("Portfolio exported as portfolio_report.pdf")
 
 
 #main exec
