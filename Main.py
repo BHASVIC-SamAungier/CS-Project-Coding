@@ -342,7 +342,6 @@ class MainWindow(QWidget):
         total_profit_loss = sum(stock["profit_loss"] for stock in self.portfolio_list)
 
         text = "Investment Portfolio Report\n\n"
-
         for stock in self.portfolio_list:
             text += (
                 f"{stock['ticker']} - Buy: £{stock['buy_price']:.2f}, "
@@ -350,20 +349,23 @@ class MainWindow(QWidget):
                 f"Qty: {stock['quantity']}, "
                 f"P/L: £{stock['profit_loss']:.2f}\n"
             )
-
         text += f"\nTotal Portfolio Value: £{total_value:.2f}\n"
         text += f"Overall Profit/Loss: £{total_profit_loss:.2f}\n"
 
+        #saves to the user desktop now instead of python file
+        import os
+        desktop = os.path.join(os.path.expanduser("~"), "Desktop")
+        file_path = os.path.join(desktop, "portfolio_report.pdf")
+
         printer = QPrinter()
         printer.setOutputFormat(QPrinter.PdfFormat)
-        printer.setOutputFileName("portfolio_report.pdf")
+        printer.setOutputFileName(file_path)
 
         doc = QTextDocument()
         doc.setPlainText(text)
         doc.print_(printer)
 
-        print("Portfolio exported as portfolio_report.pdf")
-
+        print(f"Portfolio exported as portfolio_report.pdf: {file_path}")
 
 #main exec
 if __name__ == "__main__":
