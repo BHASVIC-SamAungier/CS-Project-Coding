@@ -6,6 +6,7 @@ import sys
 import json
 import matplotlib.pyplot as plt
 import requests
+import os
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -353,7 +354,6 @@ class MainWindow(QWidget):
         text += f"Overall Profit/Loss: £{total_profit_loss:.2f}\n"
 
         #saves to the user desktop now instead of python file
-        import os
         desktop = os.path.join(os.path.expanduser("~"), "Desktop")
         file_path = os.path.join(desktop, "portfolio_report.pdf")
 
