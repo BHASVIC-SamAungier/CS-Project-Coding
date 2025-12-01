@@ -41,13 +41,34 @@ class MainWindow(QWidget):
         self.add_button.clicked.connect(self.show_add_investment_page)
         self.overview_button.clicked.connect(self.show_portfolio_overview_page)
 
+        self.compound_page = self.create_compound_interest_page()
+        self.stacked.addWidget(self.compound_page)
+
+        #nav button
+        self.compound_button = QPushButton("Compound Interest")
+        self.navbar.addWidget(self.compound_button)
+        self.compound_button.clicked.connect(self.show_compound_interest_page)
+
         self.portfolio_list = []
 
     #home page
     def create_home_page(self):
         page = QWidget()
         layout = QVBoxLayout()
+
         layout.addWidget(QLabel("Investment Portfolio Tracker"))
+
+        layout.addWidget(QLabel("Notification Threshold (£):"))
+        self.threshold_input = QLineEdit("100")
+        layout.addWidget(self.threshold_input)
+
+        self.check_button = QPushButton("Check Notifications")
+        layout.addWidget(self.check_button)
+        self.check_button.clicked.connect(self.check_notifications)
+
+        self.notify_label = QLabel("")
+        layout.addWidget(self.notify_label)
+
         page.setLayout(layout)
         return page
 
@@ -115,6 +136,53 @@ class MainWindow(QWidget):
         page.setLayout(layout)
         return page
 
+    #compound interest tool
+    def create_compound_interest_page(self):
+        page = QWidget()
+        layout = QVBoxLayout()
+
+        layout.addWidget(QLabel("Compound Interest Calculator"))
+
+        layout.addWidget(QLabel("Starting Amount (£): "))
+        self.starting_input = QLineEdit()
+        layout.addWidget(self.starting_input)
+
+        layout.addWidget(QLabel("Annual Interest Rate (%): "))
+        self.rate_input = QLineEdit()
+        layout.addWidget(self.rate_input)
+
+        layout.addWidget(QLabel("Years: "))
+        self.years_input = QLineEdit()
+        layout.addWidget(self.years_input)
+
+        layout.addWidget(QLabel("Number of times compounded (per year):"))
+        self.freq_input = QLineEdit("1")
+        layout.addWidget(self.freq_input)
+
+        self.calc_button = QPushButton("Calculate Compound Interest")
+        layout.addWidget(self.calc_button)
+        self.calc_button.clicked.connect(self.calculate_compound_interest)
+
+        self.result_label = QLabel("")
+        layout.addWidget(self.result_label)
+
+        page.setLayout(layout)
+        return page
+
+    def calculate_compound_interest(self):
+        try:
+            P = float(self.starting_input.text())
+            r = float(self.rate_input.text()) / 100
+            t = float(self.years_input.text())
+            n = float(self.freq_input.text())
+
+            T = P * (1 + r / n) * (n * t) #standard comppound interest formula
+            interest = A - P
+
+            self.result_label.setText(f"Total Amount: £{T:.2f}\nInterest Earned: £{interest:.2f}")
+        except ValueError:
+            self.result_label.setText("Please enter values for each section")
+
     #nav bar functions
     def show_home_page(self):
         self.stacked.setCurrentWidget(self.home_page)
@@ -124,6 +192,9 @@ class MainWindow(QWidget):
 
     def show_portfolio_overview_page(self):
         self.stacked.setCurrentWidget(self.overview_page)
+
+    def show_compound_interest_page(self):
+        self.stacked.setCurrentWidget(self.compound_page)
 
     # add stock function
     def add_stock(self):
@@ -205,6 +276,27 @@ class MainWindow(QWidget):
 
         self.results_label.setText(output)
         self.results_label.setStyleSheet(f"color: {colour}")
+
+        self.check_notifications()
+
+    def check_notifications(self):
+            if not self.portfolio_list:
+                self.notify_label.setText("Add stocks first")
+                return
+
+            try:
+                threshold = float(self.threshold_input.text())
+            except:
+                self.notify_label.setText("Enter a number you want to set as your threshold number")
+                return
+
+            self.calculate_profit_loss()
+            total_profit_loss = sum(stock["profit_loss"] for stock in self.portfolio_list)
+
+            if abs(total_profit_loss) > threshold:
+                self.notify_label.setText(f"P/L £{total_profit_loss:.2f} exceeds your set threshold, act quickly!")
+            else:
+                self.notify_label.setText("No notifications yet")
 
     def Portfolio_Overview_Graph(self):
         json_data = {
